@@ -28,13 +28,6 @@ toList = M.fromListsM M.Seq
 populate :: Int -> IO (M.Matrix M.B Bool)
 populate x = do fromJust . toList . chunksOf x <$> rolls x
 
-multiplyWorld :: M.Matrix M.B Bool -> M.Matrix M.B Bool
-multiplyWorld x = M.compute $ M.append' 2 x (M.reverse Dim2 x)
-
-multiplyWorld' :: M.Matrix M.B Bool -> M.Matrix M.B Bool
-multiplyWorld' x = M.compute $ M.append' 2 x' (M.reverse Dim2 x')
-    where x' = M.transpose x
-
 render' :: M.Matrix M.B Bool -> Picture
 render' = pictures . concat . M.toList . M.imap (\(i :. j) x -> [Translate (fromIntegral i*squareSize - fromIntegral size*squareSize/2) (fromIntegral j*squareSize - fromIntegral size*squareSize/2) $ if x then Color black $ Polygon [(0,0), (0,squareSize), (squareSize,squareSize), (squareSize,0)] else Blank])
 
