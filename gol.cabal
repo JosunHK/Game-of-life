@@ -6,7 +6,6 @@ cabal-version: 2.2
 
 name:           gol
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/gol#readme>
 homepage:       https://github.com/githubuser/gol#readme
 bug-reports:    https://github.com/githubuser/gol/issues
 author:         Author name here
@@ -49,7 +48,7 @@ executable gol-exe
       Paths_gol
   hs-source-dirs:
       app
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -O2 -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , gloss >=1.13.2.2

@@ -3,20 +3,17 @@ import Graphics.Gloss
 import Data.Massiv.Core
 import qualified Data.Massiv.Array as M
 import System.Random
-import Data.List.Split
-import Control.Monad
-import Data.Maybe
 
 data State = State
-    { world :: M.Matrix M.B Bool
+    { world :: M.Matrix M.U Bool
     ,t :: Int
     }
 
 size :: Int
-size = 250 
+size = 350 
 
 squareSize :: Float 
-squareSize = 10 
+squareSize = 5 
 
 lifeRules :: Bool -> Int -> Bool
 lifeRules True 2  = True
@@ -24,20 +21,11 @@ lifeRules True 3  = True
 lifeRules False 3 = True
 lifeRules _ _     = False
 
-rolls :: Int -> IO [Bool]
-rolls x = replicateM (x*x) randomIO 
-
-toList :: [[Bool]] -> Maybe (M.Matrix M.B Bool)
-toList = M.fromListsM M.Seq 
-
-populate :: Int -> IO (M.Matrix M.B Bool)
-populate x = do fromJust . toList . chunksOf x <$> rolls x
-
-multiplyWorld :: M.Matrix M.B Bool -> M.Matrix M.B Bool
+multiplyWorld :: M.Matrix M.U Bool -> M.Matrix M.U Bool
 multiplyWorld = multiplyWorldY . multiplyWorldX 
-    where multiplyWorldX :: M.Matrix M.B Bool -> M.Matrix M.B Bool -- flip and copy the world along the x axis
+    where multiplyWorldX :: M.Matrix M.U Bool -> M.Matrix M.U Bool -- flip and copy the world along the x axis
           multiplyWorldX x = M.compute $ M.append' 2 x (M.reverse Dim2 x)
-          multiplyWorldY :: M.Matrix M.B Bool -> M.Matrix M.B Bool -- flip and copy the world again along the y axis
+          multiplyWorldY :: M.Matrix M.U Bool -> M.Matrix M.U Bool -- flip and copy the world again along the y axis
           multiplyWorldY x = M.compute $ M.append' 2 x' (M.reverse Dim2 x')
             where x' = M.transpose x
 
@@ -61,6 +49,9 @@ rainbow h s l = makeColor r g b 1
               g = hueToRGB p q h
               b = hueToRGB p q (h - 1/3)
 
+randomArray :: Int -> M.Matrix M.U Bool
+randomArray seed = M.compute $ M.uniformArray (mkStdGen seed) M.Seq (Sz2 size size)
+
 render :: State -> Picture
 render s = pictures 
         $ concat 
@@ -70,7 +61,7 @@ render s = pictures
                 (fromIntegral i*squareSize - fromIntegral size * squareSize / 2) (fromIntegral j*squareSize - fromIntegral size*squareSize/2)
                 $ if x 
                   then Color (rainbow (fromIntegral ((i+j+offset) `mod` 360) / 360) 0.65 0.7) $ Polygon [(0,0), (0,squareSize), (squareSize,squareSize), (squareSize,0)] 
-                  else Color (rainbow (fromIntegral ((i+j+offset) `mod` 360) / 360) 0.5 0.45) $ Line [(0,0), (0,squareSize), (squareSize,squareSize), (squareSize,0)]  
+                  else Color (rainbow (fromIntegral ((i+j+offset) `mod` 360) / 360) 0.1 0.3) $ Line [(0,0), (0,squareSize), (squareSize,squareSize), (squareSize,0)]  
                 ])
         $ world s
         where offset = t s
@@ -90,6 +81,8 @@ nextFrame _ _ s = s { world = newWorld, t = t'}
 
 main :: IO ()
 main = do
-        world' <- populate size
+        seed <- randomIO::IO Int
+        let world' = randomArray seed
         let worldState = State world' 0
-        simulate FullScreen (makeColorI 18 18 18 1) 30 worldState render nextFrame
+        simulate (InWindow "Game of Life" (size*floor squareSize, size*floor squareSize) (10, 10)) (makeColorI 18 18 18 1) 60 worldState render nextFrame
+
