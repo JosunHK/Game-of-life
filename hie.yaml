@@ -1,0 +1,10 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:gol"
+
+    - path: "app/Main.hs"
+      component: "gol:exe:gol-exe"
+
+    - path: "test"
+      component: "gol:test:gol-test"
